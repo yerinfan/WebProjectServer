@@ -1,0 +1,14 @@
+[build]
+# python 3.11로 환경 설정
+language = "python"
+
+[start]
+cmd = "gunicorn app:app"  # Flask 진입점이 app.py에서 app = Flask(__name__)
+
+[packages]
+apt = [
+  "libglib2.0-0",      # ❗ GTK 관련 필수
+  "libsm6",            # OpenCV GUI 관련
+  "libxext6",
+  "libxrender-dev"
+]
