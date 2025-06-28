@@ -2,4 +2,3 @@ flask
 gunicorn
 opencv-python
 mediapipe
-flask-cors
