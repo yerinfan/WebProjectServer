@@ -1,4 +1,4 @@
+opencv-python-headless
+mediapipe
 flask
 gunicorn
-opencv-python
-mediapipe
