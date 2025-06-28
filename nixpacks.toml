@@ -7,8 +7,9 @@ cmd = "gunicorn app:app"  # Flask 진입점이 app.py에서 app = Flask(__name__
 
 [packages]
 apt = [
-  "libglib2.0-0",      # ❗ GTK 관련 필수
-  "libsm6",            # OpenCV GUI 관련
+  "libgl1",           # ✅ libGL.so.1 오류 해결
+  "libglib2.0-0",     # mediapipe/GTK 관련
+  "libsm6",           # OpenCV 시각화 관련
   "libxext6",
   "libxrender-dev"
 ]
