@@ -1,11 +1,11 @@
 [phases.setup]
 aptPkgs = [
-  "libgl1",           # ✅ OpenCV가 필요로 하는 libGL.so.1
-  "libglib2.0-0",     # GTK 관련, mediapipe에 필요
-  "libsm6",           # OpenCV GUI 기능에 필요
+  "libgl1",
+  "libglib2.0-0",
+  "libsm6",
   "libxext6",
   "libxrender-dev"
 ]
 
 [start]
-cmd = "gunicorn main:app"  # main.py에서 app = Flask(__name__) 일 때 사용
+cmd = "gunicorn main:app"

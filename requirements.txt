@@ -1,4 +1,5 @@
-opencv-python-headless
-mediapipe
 flask
 gunicorn
+mediapipe
+opencv-python-headless
+flask-cors
