@@ -1,8 +1,8 @@
 from flask import Flask, request, jsonify
-import face_recognition
+import mediapipe as mp
 import cv2
-import base64
 import numpy as np
+import base64
 import os
 import datetime
 import shutil
@@ -11,15 +11,29 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)
 
-PORT = int(os.environ.get("PORT", 5000))
+mp_face_detection = mp.solutions.face_detection
+face_detector = mp_face_detection.FaceDetection(model_selection=0, min_detection_confidence=0.5)
+
+ENCODING_DIR = "encodings"
+os.makedirs(ENCODING_DIR, exist_ok=True)
+
+def decode_image(image_base64):
+    image_data = base64.b64decode(image_base64.split(',')[1])
+    np_arr = np.frombuffer(image_data, np.uint8)
+    img = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+    return img
+
+def detect_face(img):
+    img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    result = face_detector.process(img_rgb)
+    return result.detections
 
 @app.route("/face/check", methods=["POST"])
 def check_face():
     data = request.json
-    image_data = base64.b64decode(data["image"].split(",")[1])
-    img = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_COLOR)
-    face_locations = face_recognition.face_locations(img)
-    return jsonify(hasFace=bool(face_locations))
+    img = decode_image(data["image"])
+    detections = detect_face(img)
+    return jsonify(hasFace=bool(detections))
 
 @app.route("/register-face", methods=["POST"])
 def register_face():
@@ -30,75 +44,41 @@ def register_face():
     if not username or not images:
         return jsonify(success=False, message="요청 데이터 누락")
 
-    user_dir = os.path.join("encodings", username)
+    user_dir = os.path.join(ENCODING_DIR, username)
     os.makedirs(user_dir, exist_ok=True)
 
-    all_encodings = []
-
+    saved = 0
     for idx, img_base64 in enumerate(images):
-        img_data = base64.b64decode(img_base64.split(",")[1])
-        img = cv2.imdecode(np.frombuffer(img_data, np.uint8), cv2.IMREAD_COLOR)
+        img = decode_image(img_base64)
+        detections = detect_face(img)
 
-        timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
-        img_path = os.path.join(user_dir, f"{timestamp}_{idx+1}.jpg")
-        cv2.imwrite(img_path, img)
+        if detections:
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            path = os.path.join(user_dir, f"{ts}_{idx+1}.jpg")
+            cv2.imwrite(path, img)
+            saved += 1
 
-        face_locations = face_recognition.face_locations(img)
-        encodings = face_recognition.face_encodings(img, face_locations)
-        if encodings:
-            all_encodings.append(encodings[0])
-
-    if not all_encodings:
-        return jsonify(success=False, message="인코딩 실패")
-
-    enc_path = os.path.join(user_dir, f"{username}.npy")
-    if os.path.exists(enc_path):
-        existing = np.load(enc_path, allow_pickle=True)
-        all_encodings = list(existing) + all_encodings
-
-    np.save(enc_path, all_encodings)
-
-    return jsonify(success=True, message="등록 완료")
+    if saved == 0:
+        return jsonify(success=False, message="얼굴이 감지되지 않아 저장되지 않았습니다.")
+    
+    return jsonify(success=True, message=f"{saved}장 저장 완료")
 
 @app.route("/admin/face-users", methods=["GET"])
 def list_users():
-    users = []
-    if os.path.exists("encodings"):
-        for user in os.listdir("encodings"):
-            if os.path.isfile(os.path.join("encodings", user, f"{user}.npy")):
-                users.append(user)
+    users = [u for u in os.listdir(ENCODING_DIR) if os.path.isdir(os.path.join(ENCODING_DIR, u))]
     return jsonify(users)
 
 @app.route("/admin/delete-face/<username>", methods=["DELETE"])
 def delete_user(username):
-    user_dir = os.path.join("encodings", username)
+    user_dir = os.path.join(ENCODING_DIR, username)
     if os.path.exists(user_dir):
         shutil.rmtree(user_dir)
         return jsonify(success=True, message="삭제 완료")
-    else:
-        return jsonify(success=False, message="사용자 없음")
+    return jsonify(success=False, message="사용자 없음")
 
-@app.route("/verify-face", methods=["POST"])
-def verify_face():
-    data = request.json
-    image_data = base64.b64decode(data["image"].split(",")[1])
-    img = cv2.imdecode(np.frombuffer(image_data, np.uint8), cv2.IMREAD_COLOR)
-
-    input_encs = face_recognition.face_encodings(img)
-    if not input_encs:
-        return jsonify(success=False, message="인식 실패", username=None)
-
-    input_enc = input_encs[0]
-
-    for user in os.listdir("encodings"):
-        enc_path = os.path.join("encodings", user, f"{user}.npy")
-        if os.path.exists(enc_path):
-            known_encs = np.load(enc_path, allow_pickle=True)
-            results = face_recognition.compare_faces(known_encs, input_enc)
-            if True in results:
-                return jsonify(success=True, username=user, message="로그인 성공")
-
-    return jsonify(success=False, username=None, message="등록되지 않은 얼굴입니다")
+@app.route("/")
+def health_check():
+    return "Mediapipe 기반 얼굴 등록 서버 정상 동작 중"
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=PORT)
+    app.run(host="0.0.0.0", port=5000)
