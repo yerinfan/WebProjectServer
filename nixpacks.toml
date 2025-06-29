@@ -8,4 +8,4 @@ aptPkgs = [
 ]
 
 [start]
-cmd = "gunicorn main:app"
+cmd = "python app.py"

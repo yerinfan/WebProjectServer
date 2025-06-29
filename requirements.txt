@@ -1,5 +1,5 @@
 flask
-gunicorn
-mediapipe
+face_recognition
 opencv-python-headless
-flask-cors
+numpy
+pillow
