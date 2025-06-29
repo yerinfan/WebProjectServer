@@ -1,10 +1,13 @@
 [phases.setup]
 aptPkgs = [
-  "libgl1",
+  "cmake",            # ✅ 핵심! CMake 없으면 dlib 설치 실패
+  "build-essential",  # C++ 컴파일러 포함
+  "libgl1",           
   "libglib2.0-0",
   "libsm6",
   "libxext6",
-  "libxrender-dev"
+  "libxrender-dev",
+  "python3-dev"       # dlib 컴파일 시 필요
 ]
 
 [start]
