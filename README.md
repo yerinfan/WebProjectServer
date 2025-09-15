@@ -31,37 +31,7 @@ WebSocket, Ajax API, Spring Security 등을 통해 백엔드를 구현했습니�
 ---
 
 ## 🏗️ 시스템 아키텍처
-
-```mermaid
-flowchart LR
-    subgraph Client[🌐 Web Client]
-        UI[HTML/CSS/JS + Thymeleaf]
-    end
-
-    subgraph Server[⚙️ Spring Boot Server]
-        Controller[Spring MVC Controller]
-        Service[Service Layer]
-        Repo[MyBatis Repository]
-        Security[Spring Security]
-        WebSocket[WebSocket (SockJS+STOMP)]
-        RESTAPI[REST API (Ajax)]
-    end
-
-    subgraph DB[🗄️ Oracle DB]
-        UserTable[(Users)]
-        ChatTable[(Chats)]
-        MemoTable[(Memos)]
-    end
-
-    subgraph FaceServer[🤖 Flask Face Recognition]
-        FaceAPI[Face Recognition API]
-    end
-
-    UI --> |HTTP / Ajax| Controller
-    UI <-->|WebSocket| WebSocket
-    Controller --> Service --> Repo --> DB
-    Security --> Controller
-    Service <-->|REST API| FaceServer
+<img width="1264" height="740" alt="architecture" src="https://github.com/user-attachments/assets/cb47dc47-c93b-4fba-b382-108eee5b96ff" />
 
 ---
 
