@@ -30,6 +30,41 @@ WebSocket, Ajax API, Spring Security 등을 통해 백엔드를 구현했습니�
 
 ---
 
+## 🏗️ 시스템 아키텍처
+
+```mermaid
+flowchart LR
+    subgraph Client[🌐 Web Client]
+        UI[HTML/CSS/JS + Thymeleaf]
+    end
+
+    subgraph Server[⚙️ Spring Boot Server]
+        Controller[Spring MVC Controller]
+        Service[Service Layer]
+        Repo[MyBatis Repository]
+        Security[Spring Security]
+        WebSocket[WebSocket (SockJS+STOMP)]
+        RESTAPI[REST API (Ajax)]
+    end
+
+    subgraph DB[🗄️ Oracle DB]
+        UserTable[(Users)]
+        ChatTable[(Chats)]
+        MemoTable[(Memos)]
+    end
+
+    subgraph FaceServer[🤖 Flask Face Recognition]
+        FaceAPI[Face Recognition API]
+    end
+
+    UI --> |HTTP / Ajax| Controller
+    UI <-->|WebSocket| WebSocket
+    Controller --> Service --> Repo --> DB
+    Security --> Controller
+    Service <-->|REST API| FaceServer
+
+---
+
 ## 📂 주요 기능
 - 회원 관리 (회원가입/로그인/권한 분리)
 - 채팅방 생성/참여/메시지 브로드캐스트
@@ -44,3 +79,7 @@ WebSocket, Ajax API, Spring Security 등을 통해 백엔드를 구현했습니�
 2. 서버 실행
    ```bash
    ./mvnw spring-boot:run
+
+
+
+
