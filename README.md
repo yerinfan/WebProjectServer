@@ -26,7 +26,7 @@ WebSocket, Ajax API, Spring Security 등을 통해 백엔드를 구현했습니�
 
 ## 🏗️ 시스템 아키텍처
 
-![System Architecture](docs/architecture.png)
+<img width="1264" height="740" alt="architecture" src="https://github.com/user-attachments/assets/4b13dcd7-6b92-4296-9983-fafa38501b30" />
 
 - **Spring Boot Server**: REST API, WebSocket, Spring Security 인증/인가 담당  
 - **Oracle DB**: 사용자, 채팅, 메모 데이터 관리  
